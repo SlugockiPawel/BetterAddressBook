@@ -4,6 +4,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
@@ -71,6 +72,16 @@ namespace BetterAddressBook.Areas.Identity.Pages.Account
         /// </summary>
         public class InputModel
         {
+            [Required]
+            [DisplayName("First Name")]
+            [StringLength(50, ErrorMessage = "{0} must be between {2} and {1} characters long", MinimumLength = 2)]
+            public string FirstName { get; set; }
+    
+            [Required]
+            [DisplayName("Last Name")]
+            [StringLength(50, ErrorMessage = "{0} must be between {2} and {1} characters long", MinimumLength = 2)]
+            public string LastName { get; set; }
+            
             /// <summary>
             ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
             ///     directly from your code. This API may change or be removed in future releases.
@@ -159,7 +170,12 @@ namespace BetterAddressBook.Areas.Identity.Pages.Account
         {
             try
             {
-                return Activator.CreateInstance<AppUser>();
+                AppUser user = Activator.CreateInstance<AppUser>();
+
+                user.FirstName = Input.FirstName;
+                user.LastName = Input.LastName;
+                
+                return user;
             }
             catch
             {
