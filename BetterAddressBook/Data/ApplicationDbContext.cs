@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace BetterAddressBook.Data
 {
-    public class ApplicationDbContext : IdentityDbContext<AppUser>
+    public class ApplicationDbContext : IdentityDbContext<AppUserModel>
     {
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
             : base(options)

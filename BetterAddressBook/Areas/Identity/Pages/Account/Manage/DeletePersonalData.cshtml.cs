@@ -15,13 +15,13 @@ namespace BetterAddressBook.Areas.Identity.Pages.Account.Manage
 {
     public class DeletePersonalDataModel : PageModel
     {
-        private readonly UserManager<AppUser> _userManager;
-        private readonly SignInManager<AppUser> _signInManager;
+        private readonly UserManager<AppUserModel> _userManager;
+        private readonly SignInManager<AppUserModel> _signInManager;
         private readonly ILogger<DeletePersonalDataModel> _logger;
 
         public DeletePersonalDataModel(
-            UserManager<AppUser> userManager,
-            SignInManager<AppUser> signInManager,
+            UserManager<AppUserModel> userManager,
+            SignInManager<AppUserModel> signInManager,
             ILogger<DeletePersonalDataModel> logger)
         {
             _userManager = userManager;

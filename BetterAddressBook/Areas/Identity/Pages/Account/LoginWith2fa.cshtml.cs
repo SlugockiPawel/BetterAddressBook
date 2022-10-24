@@ -17,13 +17,13 @@ namespace BetterAddressBook.Areas.Identity.Pages.Account
 {
     public class LoginWith2faModel : PageModel
     {
-        private readonly SignInManager<AppUser> _signInManager;
-        private readonly UserManager<AppUser> _userManager;
+        private readonly SignInManager<AppUserModel> _signInManager;
+        private readonly UserManager<AppUserModel> _userManager;
         private readonly ILogger<LoginWith2faModel> _logger;
 
         public LoginWith2faModel(
-            SignInManager<AppUser> signInManager,
-            UserManager<AppUser> userManager,
+            SignInManager<AppUserModel> signInManager,
+            UserManager<AppUserModel> userManager,
             ILogger<LoginWith2faModel> logger)
         {
             _signInManager = signInManager;

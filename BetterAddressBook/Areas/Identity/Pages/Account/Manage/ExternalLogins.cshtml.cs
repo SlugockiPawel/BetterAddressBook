@@ -17,14 +17,14 @@ namespace BetterAddressBook.Areas.Identity.Pages.Account.Manage
 {
     public class ExternalLoginsModel : PageModel
     {
-        private readonly UserManager<AppUser> _userManager;
-        private readonly SignInManager<AppUser> _signInManager;
-        private readonly IUserStore<AppUser> _userStore;
+        private readonly UserManager<AppUserModel> _userManager;
+        private readonly SignInManager<AppUserModel> _signInManager;
+        private readonly IUserStore<AppUserModel> _userStore;
 
         public ExternalLoginsModel(
-            UserManager<AppUser> userManager,
-            SignInManager<AppUser> signInManager,
-            IUserStore<AppUser> userStore)
+            UserManager<AppUserModel> userManager,
+            SignInManager<AppUserModel> signInManager,
+            IUserStore<AppUserModel> userStore)
         {
             _userManager = userManager;
             _signInManager = signInManager;
@@ -70,7 +70,7 @@ namespace BetterAddressBook.Areas.Identity.Pages.Account.Manage
                 .ToList();
 
             string passwordHash = null;
-            if (_userStore is IUserPasswordStore<AppUser> userPasswordStore)
+            if (_userStore is IUserPasswordStore<AppUserModel> userPasswordStore)
             {
                 passwordHash = await userPasswordStore.GetPasswordHashAsync(user, HttpContext.RequestAborted);
             }

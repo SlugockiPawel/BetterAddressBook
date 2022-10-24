@@ -16,10 +16,10 @@ namespace BetterAddressBook.Areas.Identity.Pages.Account
 {
     public class ConfirmEmailChangeModel : PageModel
     {
-        private readonly UserManager<AppUser> _userManager;
-        private readonly SignInManager<AppUser> _signInManager;
+        private readonly UserManager<AppUserModel> _userManager;
+        private readonly SignInManager<AppUserModel> _signInManager;
 
-        public ConfirmEmailChangeModel(UserManager<AppUser> userManager, SignInManager<AppUser> signInManager)
+        public ConfirmEmailChangeModel(UserManager<AppUserModel> userManager, SignInManager<AppUserModel> signInManager)
         {
             _userManager = userManager;
             _signInManager = signInManager;

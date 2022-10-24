@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Identity;
 
 namespace BetterAddressBook.Models;
 
-public class AppUser : IdentityUser
+public class AppUserModel : IdentityUser
 {
     [Required]
     [DisplayName("First Name")]

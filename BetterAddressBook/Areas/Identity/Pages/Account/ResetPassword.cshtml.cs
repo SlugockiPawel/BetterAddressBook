@@ -17,9 +17,9 @@ namespace BetterAddressBook.Areas.Identity.Pages.Account
 {
     public class ResetPasswordModel : PageModel
     {
-        private readonly UserManager<AppUser> _userManager;
+        private readonly UserManager<AppUserModel> _userManager;
 
-        public ResetPasswordModel(UserManager<AppUser> userManager)
+        public ResetPasswordModel(UserManager<AppUserModel> userManager)
         {
             _userManager = userManager;
         }

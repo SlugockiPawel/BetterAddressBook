@@ -14,12 +14,12 @@ namespace BetterAddressBook.Areas.Identity.Pages.Account.Manage
 {
     public class SetPasswordModel : PageModel
     {
-        private readonly UserManager<AppUser> _userManager;
-        private readonly SignInManager<AppUser> _signInManager;
+        private readonly UserManager<AppUserModel> _userManager;
+        private readonly SignInManager<AppUserModel> _signInManager;
 
         public SetPasswordModel(
-            UserManager<AppUser> userManager,
-            SignInManager<AppUser> signInManager)
+            UserManager<AppUserModel> userManager,
+            SignInManager<AppUserModel> signInManager)
         {
             _userManager = userManager;
             _signInManager = signInManager;
