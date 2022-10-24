@@ -11,5 +11,7 @@ namespace BetterAddressBook.Data
         {
         }
 
+        public virtual DbSet<CategoryModel> Categories { get; set; }
+        public virtual DbSet<ContactModel> Contacts { get; set; }
     }
 }
