@@ -1,6 +1,8 @@
 using BetterAddressBook.Data;
+using BetterAddressBook.Enums;
 using BetterAddressBook.Models;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -11,10 +13,12 @@ namespace BetterAddressBook.Controllers;
 public class ContactsController : Controller
 {
     private readonly ApplicationDbContext _context;
+    private readonly UserManager<AppUserModel> _userManager;
 
-    public ContactsController(ApplicationDbContext context)
+    public ContactsController(ApplicationDbContext context, UserManager<AppUserModel> userManager)
     {
         _context = context;
+        _userManager = userManager;
     }
 
     // GET: Contacts
@@ -47,6 +51,8 @@ public class ContactsController : Controller
     public IActionResult Create()
     {
         ViewData["AppUserId"] = new SelectList(_context.Users, "Id", "Id");
+        ViewData["StatesList"] = new SelectList(Enum.GetValues(typeof(States))); //.Cast<States>().ToList()
+        
         return View();
     }
 
@@ -57,25 +63,29 @@ public class ContactsController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Create(
         [Bind(
-            "Id,AppUserId,FirstName,LastName,BirthDate,Address1,Address2,City,State,ZipCode,Email,PhoneNumber,Created,ImageData,ImageType"
+            "Id,FirstName,LastName,BirthDate,Address1,Address2,City,State,ZipCode,Email,PhoneNumber,ImageFile"
         )]
         ContactModel contactModel
     )
     {
+        ModelState.Remove("AppUserId");
+        
         if (ModelState.IsValid)
         {
+            contactModel.AppUserId = _userManager.GetUserId(User);
+            contactModel.Created = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc);
+
+            if (contactModel.BirthDate is not null)
+            {
+                contactModel.BirthDate = DateTime.SpecifyKind(contactModel.BirthDate.Value, DateTimeKind.Utc);
+            }
+            
             _context.Add(contactModel);
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
-
-        ViewData["AppUserId"] = new SelectList(
-            _context.Users,
-            "Id",
-            "Id",
-            contactModel.AppUserId
-        );
-        return View(contactModel);
+        
+        return RedirectToAction(nameof(Index));
     }
 
     // GET: Contacts/Edit/5
