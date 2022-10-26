@@ -1,11 +1,13 @@
 using BetterAddressBook.Data;
 using BetterAddressBook.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 
 namespace BetterAddressBook.Controllers;
 
+[Authorize]
 public class ContactsController : Controller
 {
     private readonly ApplicationDbContext _context;
