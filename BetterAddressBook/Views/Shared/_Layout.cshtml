@@ -1,4 +1,7 @@
-﻿<!DOCTYPE html>
+﻿@using Microsoft.AspNetCore.Identity
+@inject SignInManager<AppUserModel> SignInManager
+
+<!DOCTYPE html>
 <html lang="en" class="h-100">
 <head>
     <title>@ViewData["Title"] - BetterAddressBook</title>
@@ -41,12 +44,15 @@
                     <li class="nav-item">
                         <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link" asp-area="" asp-controller="Contacts" asp-action="Index">Contacts</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" asp-area="" asp-controller="Categories" asp-action="Index">Category</a>
-                    </li>
+                    @if (SignInManager.IsSignedIn(User))
+                    {
+                        <li class="nav-item">
+                            <a class="nav-link" asp-area="" asp-controller="Contacts" asp-action="Index">Contacts</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" asp-area="" asp-controller="Categories" asp-action="Index">Categories</a>
+                        </li>
+                    }
                 </ul>
                 <partial name="_LoginPartial"/>
             </div>
@@ -70,17 +76,17 @@
                 </div>
                 <div class="col d-flex justify-content-center">
                     <!--suppress CheckImageSize -->
-                    <img src="img/ContactPro.png" height="50" alt="logo img">
+                    <img src="/img/ContactPro.png" height="50" alt="logo img">
                 </div>
                 <div class="col-12 col-md d-flex justify-content-center justify-content-md-end">
                     <a href="#" class="socialicons">
                         <i class="bi bi-linkedin p-2 "></i>
                     </a>
                     <a href="#" class="socialicons">
-                        <i class="bi bi-github p-2"></i>
+                        <i class="bi bi-hash p-2 "></i>
                     </a>
                     <a href="#" class="socialicons">
-                        <i class="bi bi-hash p-2 "></i>
+                        <i class="bi bi-github p-2"></i>
                     </a>
                 </div>
             </div>
