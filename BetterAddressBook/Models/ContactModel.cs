@@ -62,7 +62,7 @@ public class ContactModel
 
     [NotMapped] public IFormFile? ImageFile { get; set; }
 
-    public virtual AppUserModel AppUser { get; set; }
+    public virtual AppUserModel? AppUser { get; set; }
 
     public virtual ICollection<CategoryModel> Categories { get; set; } =
         new HashSet<CategoryModel>();
