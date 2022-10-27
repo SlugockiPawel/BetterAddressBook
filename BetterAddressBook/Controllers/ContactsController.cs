@@ -1,6 +1,7 @@
 using BetterAddressBook.Data;
 using BetterAddressBook.Enums;
 using BetterAddressBook.Models;
+using BetterAddressBook.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -13,12 +14,18 @@ namespace BetterAddressBook.Controllers;
 public class ContactsController : Controller
 {
     private readonly ApplicationDbContext _context;
+    private readonly IImageService _imageService;
     private readonly UserManager<AppUserModel> _userManager;
 
-    public ContactsController(ApplicationDbContext context, UserManager<AppUserModel> userManager)
+    public ContactsController(
+        ApplicationDbContext context,
+        UserManager<AppUserModel> userManager,
+        IImageService imageService
+    )
     {
         _context = context;
         _userManager = userManager;
+        _imageService = imageService;
     }
 
     // GET: Contacts
@@ -52,7 +59,7 @@ public class ContactsController : Controller
     {
         ViewData["AppUserId"] = new SelectList(_context.Users, "Id", "Id");
         ViewData["StatesList"] = new SelectList(Enum.GetValues(typeof(States))); //.Cast<States>().ToList()
-        
+
         return View();
     }
 
@@ -69,22 +76,29 @@ public class ContactsController : Controller
     )
     {
         ModelState.Remove("AppUserId");
-        
-        if (ModelState.IsValid)
-        {
-            contactModel.AppUserId = _userManager.GetUserId(User);
-            contactModel.Created = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc);
 
-            if (contactModel.BirthDate is not null)
-            {
-                contactModel.BirthDate = DateTime.SpecifyKind(contactModel.BirthDate.Value, DateTimeKind.Utc);
-            }
-            
-            _context.Add(contactModel);
-            await _context.SaveChangesAsync();
+        if (!ModelState.IsValid)
             return RedirectToAction(nameof(Index));
+
+        contactModel.AppUserId = _userManager.GetUserId(User);
+        contactModel.Created = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc);
+
+        if (contactModel.BirthDate is not null)
+        {
+            contactModel.BirthDate = DateTime.SpecifyKind(
+                contactModel.BirthDate.Value,
+                DateTimeKind.Utc
+            );
         }
-        
+
+        if (contactModel.ImageFile is not null)
+        {
+            contactModel.ImageData = await _imageService.ConvertToByteArrayAsync(contactModel.ImageFile);
+            contactModel.ImageType = contactModel.ImageFile.ContentType;
+        }
+
+        _context.Add(contactModel);
+        await _context.SaveChangesAsync();
         return RedirectToAction(nameof(Index));
     }
 
@@ -102,12 +116,7 @@ public class ContactsController : Controller
             return NotFound();
         }
 
-        ViewData["AppUserId"] = new SelectList(
-            _context.Users,
-            "Id",
-            "Id",
-            contactModel.AppUserId
-        );
+        ViewData["AppUserId"] = new SelectList(_context.Users, "Id", "Id", contactModel.AppUserId);
         return View(contactModel);
     }
 
@@ -149,12 +158,7 @@ public class ContactsController : Controller
             return RedirectToAction(nameof(Index));
         }
 
-        ViewData["AppUserId"] = new SelectList(
-            _context.Users,
-            "Id",
-            "Id",
-            contactModel.AppUserId
-        );
+        ViewData["AppUserId"] = new SelectList(_context.Users, "Id", "Id", contactModel.AppUserId);
         return View(contactModel);
     }
 
