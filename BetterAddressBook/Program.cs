@@ -17,6 +17,7 @@ builder.Services.AddDefaultIdentity<AppUserModel>(options => options.SignIn.Requ
 builder.Services.AddControllersWithViews();
 
 builder.Services.AddScoped<IImageService, ImageService>();
+builder.Services.AddScoped<IContactService, ContactService>();
 
 var app = builder.Build();
 
