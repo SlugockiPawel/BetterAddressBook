@@ -14,6 +14,7 @@ namespace BetterAddressBook.Controllers;
 public class ContactsController : Controller
 {
     private readonly IContactService _contactService;
+    private readonly ICategoryService _categoryService;
     private readonly ApplicationDbContext _context;
     private readonly IImageService _imageService;
     private readonly UserManager<AppUserModel> _userManager;
@@ -21,12 +22,13 @@ public class ContactsController : Controller
     public ContactsController(
         ApplicationDbContext context,
         UserManager<AppUserModel> userManager,
-        IImageService imageService, IContactService contactService)
+        IImageService imageService, IContactService contactService, ICategoryService categoryService)
     {
         _context = context;
         _userManager = userManager;
         _imageService = imageService;
         _contactService = contactService;
+        _categoryService = categoryService;
     }
 
     // GET: Contacts
@@ -61,7 +63,7 @@ public class ContactsController : Controller
         var userId = _userManager.GetUserId(User);
 
         ViewData["StatesList"] = new SelectList(Enum.GetValues(typeof(States))); //.Cast<States>().ToList()
-        ViewData["CategoryList"] = new MultiSelectList(await _contactService.GetUserCategoriesAsync(userId), "Id", "Name");
+        ViewData["CategoryList"] = new MultiSelectList(await _categoryService.GetCategoriesForUserAsync(userId), "Id", "Name");
 
         return View();
     }
