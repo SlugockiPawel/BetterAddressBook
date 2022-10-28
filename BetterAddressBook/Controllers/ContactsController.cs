@@ -77,7 +77,7 @@ public class ContactsController : Controller
         [Bind(
             "Id,FirstName,LastName,BirthDate,Address1,Address2,City,State,ZipCode,Email,PhoneNumber,ImageFile"
         )]
-        ContactModel contactModel
+        ContactModel contactModel, List<int> categoryList
     )
     {
         ModelState.Remove("AppUserId");
@@ -96,6 +96,7 @@ public class ContactsController : Controller
             );
         }
 
+        // add image
         if (contactModel.ImageFile is not null)
         {
             contactModel.ImageData = await _imageService.ConvertToByteArrayAsync(contactModel.ImageFile);
@@ -104,6 +105,14 @@ public class ContactsController : Controller
 
         _context.Add(contactModel);
         await _context.SaveChangesAsync();
+        
+        // add/remove categories
+
+        foreach (var categoryId in categoryList)
+        {
+            await _contactService.AddContactToCategoryAsync(categoryId, contactModel.Id);
+        }
+        
         return RedirectToAction(nameof(Index));
     }
 

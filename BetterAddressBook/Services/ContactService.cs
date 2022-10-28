@@ -14,14 +14,53 @@ public class ContactService : IContactService
         _context = context;
     }
 
-    public Task AddContactToCategoryAsync(int categoryId, int contactId)
+    public async Task AddContactToCategoryAsync(int categoryId, int contactId)
     {
-        throw new NotImplementedException();
+        try
+        {
+            var contact = await _context.Contacts.FindAsync(contactId);
+            var category = await GetCategoryWithContacts(categoryId);
+            
+            if (contact is not null && category is not null && !IsContactInCategory(category, contact))
+            {
+                category.Contacts.Add(contact);
+                await _context.SaveChangesAsync();
+            }
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            throw;
+        }
     }
 
-    public Task<bool> IsContactInCategory(int categoryId, int contactId)
+    public async Task<bool> IsContactInCategory(int categoryId, int contactId)
     {
-        throw new NotImplementedException();
+        var contact = await _context.Contacts.FindAsync(contactId);
+
+        return contact is not null && await _context.Categories
+            .Include(c => c.Contacts)
+            .AnyAsync(c => c.Id == categoryId && c.Contacts.Contains(contact));
+    }
+    
+    public bool IsContactInCategory(CategoryModel category, ContactModel contact)
+    {
+        return category.Contacts.Contains(contact);
+    }
+
+    public async Task<CategoryModel?> GetCategoryWithContacts(int categoryId)
+    {
+        try
+        {
+            return await _context.Categories
+                    .Include(c => c.Contacts)
+                    .FirstOrDefaultAsync(c => c.Id == categoryId);
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            throw;
+        }
     }
 
     public IEnumerable<ContactModel> SearchForContacts(string searchString, string userId)
