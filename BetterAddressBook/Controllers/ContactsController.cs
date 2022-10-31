@@ -219,4 +219,9 @@ public class ContactsController : Controller
     {
         return (_context.Contacts?.Any(e => e.Id == id)).GetValueOrDefault();
     }
+
+    public IActionResult SearchContacts()
+    {
+        throw new NotImplementedException();
+    }
 }
