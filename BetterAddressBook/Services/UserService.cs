@@ -29,4 +29,20 @@ public class UserService : IUserService
             throw;
         }
     }
+
+    public AppUserModel? GetUserWithContactsAndCategories(string userId)
+    {
+        try
+        {
+            return _context.Users
+                .Include(u => u.Contacts)
+                .ThenInclude(c => c.Categories)
+                .FirstOrDefault(u => u.Id == userId);
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            throw;
+        }
+    }
 }

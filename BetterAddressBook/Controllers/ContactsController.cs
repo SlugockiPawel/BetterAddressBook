@@ -34,8 +34,25 @@ public class ContactsController : Controller
     // GET: Contacts
     public async Task<IActionResult> Index()
     {
-        var applicationDbContext = _context.Contacts.Include(c => c.AppUser);
-        return View(await applicationDbContext.ToListAsync());
+        var userId = _userManager.GetUserId(User);
+        var appUser = _userService.GetUserWithContactsAndCategories(userId);
+
+        if (userId is null || appUser is null)
+        {
+            return NotFound();
+        }
+        
+        var orderedContacts = appUser.Contacts
+            .OrderBy(c => c.LastName)
+            .ThenBy(c => c.FirstName)
+            .ToList();
+
+        var categories = appUser.Contacts
+            .SelectMany(c => c.Categories);
+        
+        ViewData["CategoryId"] = new SelectList(categories, "Id", "Name");
+
+        return View(orderedContacts);
     }
 
     // GET: Contacts/Details/5

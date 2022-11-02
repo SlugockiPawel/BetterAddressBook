@@ -1,4 +1,5 @@
-﻿using System.ComponentModel;
+﻿using System.Collections;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Security.Principal;
@@ -19,4 +20,6 @@ public class AppUserModel : IdentityUser
     public string? LastName { get; set; }
     
     [NotMapped] public string? FullName => $"{FirstName} {LastName}";
+
+    public virtual ICollection<ContactModel> Contacts { get; set; } = new HashSet<ContactModel>();
 }
