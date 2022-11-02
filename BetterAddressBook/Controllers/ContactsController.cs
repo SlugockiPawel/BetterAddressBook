@@ -32,7 +32,7 @@ public class ContactsController : Controller
     }
 
     // GET: Contacts
-    public async Task<IActionResult> Index()
+    public IActionResult Index(int categoryId)
     {
         var userId = _userManager.GetUserId(User);
         var appUser = _userService.GetUserWithContactsAndCategories(userId);
@@ -42,15 +42,28 @@ public class ContactsController : Controller
             return NotFound();
         }
         
-        var orderedContacts = appUser.Contacts
-            .OrderBy(c => c.LastName)
-            .ThenBy(c => c.FirstName)
-            .ToList();
-
         var categories = appUser.Contacts
             .SelectMany(c => c.Categories);
+
+        var orderedContacts = new List<ContactModel>();
         
-        ViewData["CategoryId"] = new SelectList(categories, "Id", "Name");
+        if (categoryId == 0)
+        {
+            orderedContacts = appUser.Contacts
+                .OrderBy(c => c.LastName)
+                .ThenBy(c => c.FirstName)
+                .ToList(); 
+        }
+        else
+        {
+            orderedContacts = appUser.Contacts
+                .Where(contact => contact.Categories.Any(category => category.Id == categoryId))
+                .OrderBy(c => c.LastName)
+                .ThenBy(c => c.FirstName)
+                .ToList();
+        }
+
+        ViewData["CategoryId"] = new SelectList(categories, "Id", "Name", categoryId);
 
         return View(orderedContacts);
     }
