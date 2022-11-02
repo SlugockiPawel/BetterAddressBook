@@ -37,22 +37,22 @@ public class ContactsController : Controller
         var userId = _userManager.GetUserId(User);
         var appUser = _userService.GetUserWithContactsAndCategories(userId);
 
-        if (userId is null || appUser is null)
+        if (appUser is null)
         {
             return NotFound();
         }
-        
+
         var categories = appUser.Contacts
             .SelectMany(c => c.Categories);
 
-        var orderedContacts = new List<ContactModel>();
-        
+        List<ContactModel> orderedContacts;
+
         if (categoryId == 0)
         {
             orderedContacts = appUser.Contacts
                 .OrderBy(c => c.LastName)
                 .ThenBy(c => c.FirstName)
-                .ToList(); 
+                .ToList();
         }
         else
         {
@@ -68,6 +68,42 @@ public class ContactsController : Controller
         return View(orderedContacts);
     }
 
+    [Authorize]
+    public IActionResult SearchContacts(string searchString)
+    {
+        var appUserId = _userManager.GetUserId(User);
+        var appUser = _userService.GetUserWithContactsAndCategories(appUserId);
+
+        if (appUser is null)
+        {
+            return NotFound();
+        }
+
+        List<ContactModel> orderedContacts;
+        var categories = appUser.Contacts
+            .SelectMany(c => c.Categories);
+        
+        if (string.IsNullOrWhiteSpace(searchString))
+        {
+             orderedContacts = appUser.Contacts
+                .OrderBy(c => c.LastName)
+                .ThenBy(c => c.FirstName)
+                .ToList();
+        }
+        else
+        {
+            orderedContacts = appUser.Contacts
+                .Where(u => u.FullName!.ToLower().Contains(searchString.ToLower()))
+                .OrderBy(c => c.LastName)
+                .ThenBy(c => c.FirstName)
+                .ToList();
+        }
+        
+        ViewData["CategoryId"] = new SelectList(categories, "Id", "Name");
+
+        return View(nameof(Index), orderedContacts);
+    }
+    
     // GET: Contacts/Details/5
     public async Task<IActionResult> Details(int? id)
     {
@@ -250,8 +286,4 @@ public class ContactsController : Controller
         return (_context.Contacts?.Any(e => e.Id == id)).GetValueOrDefault();
     }
 
-    public IActionResult SearchContacts()
-    {
-        throw new NotImplementedException();
-    }
 }
