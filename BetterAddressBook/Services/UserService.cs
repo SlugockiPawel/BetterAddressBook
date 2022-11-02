@@ -5,16 +5,16 @@ using Microsoft.EntityFrameworkCore;
 
 namespace BetterAddressBook.Services;
 
-public class CategoryService : ICategoryService
+public class UserService : IUserService
 {
     private readonly ApplicationDbContext _context;
 
-    public CategoryService(ApplicationDbContext context)
+    public UserService(ApplicationDbContext context)
     {
         _context = context;
     }
 
-    public async Task<IEnumerable<CategoryModel>> GetCategoriesForUserAsync(string userId)
+    public async Task<IEnumerable<CategoryModel>> GetUserCategoriesAsync(string userId)
     {
         try
         {
