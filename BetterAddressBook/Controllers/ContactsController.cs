@@ -14,10 +14,10 @@ namespace BetterAddressBook.Controllers;
 public class ContactsController : Controller
 {
     private readonly IContactService _contactService;
-    private readonly IUserService _userService;
     private readonly ApplicationDbContext _context;
     private readonly IImageService _imageService;
     private readonly UserManager<AppUserModel> _userManager;
+    private readonly IUserService _userService;
 
     public ContactsController(
         ApplicationDbContext context,
@@ -82,10 +82,10 @@ public class ContactsController : Controller
         List<ContactModel> orderedContacts;
         var categories = appUser.Contacts
             .SelectMany(c => c.Categories);
-        
+
         if (string.IsNullOrWhiteSpace(searchString))
         {
-             orderedContacts = appUser.Contacts
+            orderedContacts = appUser.Contacts
                 .OrderBy(c => c.LastName)
                 .ThenBy(c => c.FirstName)
                 .ToList();
@@ -98,12 +98,12 @@ public class ContactsController : Controller
                 .ThenBy(c => c.FirstName)
                 .ToList();
         }
-        
+
         ViewData["CategoryId"] = new SelectList(categories, "Id", "Name");
 
         return View(nameof(Index), orderedContacts);
     }
-    
+
     // GET: Contacts/Details/5
     public async Task<IActionResult> Details(int? id)
     {
@@ -171,14 +171,14 @@ public class ContactsController : Controller
 
         _context.Add(contactModel);
         await _context.SaveChangesAsync();
-        
+
         // add/remove categories
 
         foreach (var categoryId in categoryList)
         {
             await _contactService.AddContactToCategoryAsync(categoryId, contactModel.Id);
         }
-        
+
         return RedirectToAction(nameof(Index));
     }
 
@@ -285,5 +285,4 @@ public class ContactsController : Controller
     {
         return (_context.Contacts?.Any(e => e.Id == id)).GetValueOrDefault();
     }
-
 }
