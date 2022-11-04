@@ -190,13 +190,16 @@ public class ContactsController : Controller
             return NotFound();
         }
 
-        var contactModel = await _context.Contacts.FindAsync(id);
+        var appUserId = _userManager.GetUserId(User);
+
+        var contactModel = await _contactService.GetContactForUser(id, appUserId);
         if (contactModel == null)
         {
             return NotFound();
         }
 
-        ViewData["AppUserId"] = new SelectList(_context.Users, "Id", "Id", contactModel.AppUserId);
+        ViewData["StatesList"] = new SelectList(Enum.GetValues<States>());
+        
         return View(contactModel);
     }
 
