@@ -63,6 +63,20 @@ public class ContactService : IContactService
         }
     }
 
+    public async Task<ContactModel?> GetContactForUser(int? contactId, string userId)
+    {
+        try
+        {
+            return await _context.Contacts
+                .FirstOrDefaultAsync(c => c.Id == contactId && c.AppUserId == userId);
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            throw;
+        }
+    }
+
     public IEnumerable<ContactModel> SearchForContacts(string searchString, string userId)
     {
         throw new NotImplementedException();

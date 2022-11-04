@@ -12,4 +12,5 @@ public interface IContactService
     Task RemoveContactFromCategoryAsync(int categoryId, int contactId);
     bool IsContactInCategory(CategoryModel category, ContactModel contact);
     Task<CategoryModel?> GetCategoryWithContacts(int categoryId);
+    Task<ContactModel?> GetContactForUser(int? contactId, string userId);
 }
