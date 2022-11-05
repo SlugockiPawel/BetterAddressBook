@@ -20,7 +20,7 @@ public class ContactService : IContactService
         {
             var contact = await _context.Contacts.FindAsync(contactId);
             var category = await GetCategoryWithContacts(categoryId);
-            
+
             if (contact is not null && category is not null && !IsContactInCategory(category, contact))
             {
                 category.Contacts.Add(contact);
@@ -42,7 +42,7 @@ public class ContactService : IContactService
             .Include(c => c.Contacts)
             .AnyAsync(c => c.Id == categoryId && c.Contacts.Contains(contact));
     }
-    
+
     public bool IsContactInCategory(CategoryModel category, ContactModel contact)
     {
         return category.Contacts.Contains(contact);
@@ -53,8 +53,8 @@ public class ContactService : IContactService
         try
         {
             return await _context.Categories
-                    .Include(c => c.Contacts)
-                    .FirstOrDefaultAsync(c => c.Id == categoryId);
+                .Include(c => c.Contacts)
+                .FirstOrDefaultAsync(c => c.Id == categoryId);
         }
         catch (Exception e)
         {
@@ -82,14 +82,32 @@ public class ContactService : IContactService
         throw new NotImplementedException();
     }
 
-    public Task<ICollection<int>> GetContactCategoryIdsAsync(int contactId)
+    public async Task<ICollection<int>> GetContactCategoryIdsAsync(int contactId)
     {
-        throw new NotImplementedException();
+        try
+        {
+            return (await GetContactCategoriesAsync(contactId))
+                .Select(c => c.Id)
+                .ToList();
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            throw;
+        }
     }
 
-    public Task<ICollection<CategoryModel>> GetContactCategoriesAsync(int contactId)
+    public async Task<ICollection<CategoryModel>?> GetContactCategoriesAsync(int contactId)
     {
-        throw new NotImplementedException();
+        try
+        {
+            return (await GetContactWithCategories(contactId))?.Categories;
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            throw;
+        }
     }
 
     public Task RemoveContactFromCategoryAsync(int categoryId, int contactId)
@@ -105,6 +123,21 @@ public class ContactService : IContactService
                 .Where(c => c.AppUserId == userId)
                 .OrderBy(c => c.Name)
                 .ToListAsync();
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            throw;
+        }
+    }
+
+    private async Task<ContactModel?> GetContactWithCategories(int contactId)
+    {
+        try
+        {
+            return await _context.Contacts
+                .Include(c => c.Categories)
+                .FirstOrDefaultAsync(c => c.Id == contactId);
         }
         catch (Exception e)
         {

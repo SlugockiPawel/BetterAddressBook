@@ -22,7 +22,10 @@ public class ContactsController : Controller
     public ContactsController(
         ApplicationDbContext context,
         UserManager<AppUserModel> userManager,
-        IImageService imageService, IContactService contactService, IUserService userService)
+        IImageService imageService,
+        IContactService contactService,
+        IUserService userService
+    )
     {
         _context = context;
         _userManager = userManager;
@@ -42,8 +45,7 @@ public class ContactsController : Controller
             return NotFound();
         }
 
-        var categories = appUser.Contacts
-            .SelectMany(c => c.Categories);
+        var categories = appUser.Contacts.SelectMany(c => c.Categories);
 
         List<ContactModel> orderedContacts;
 
@@ -80,8 +82,7 @@ public class ContactsController : Controller
         }
 
         List<ContactModel> orderedContacts;
-        var categories = appUser.Contacts
-            .SelectMany(c => c.Categories);
+        var categories = appUser.Contacts.SelectMany(c => c.Categories);
 
         if (string.IsNullOrWhiteSpace(searchString))
         {
@@ -129,7 +130,11 @@ public class ContactsController : Controller
         var userId = _userManager.GetUserId(User);
 
         ViewData["StatesList"] = new SelectList(Enum.GetValues(typeof(States))); //.Cast<States>().ToList()
-        ViewData["CategoryList"] = new MultiSelectList(await _userService.GetUserCategoriesAsync(userId), "Id", "Name");
+        ViewData["CategoryList"] = new MultiSelectList(
+            await _userService.GetUserCategoriesAsync(userId),
+            "Id",
+            "Name"
+        );
 
         return View();
     }
@@ -143,7 +148,8 @@ public class ContactsController : Controller
         [Bind(
             "Id,FirstName,LastName,BirthDate,Address1,Address2,City,State,ZipCode,Email,PhoneNumber,ImageFile"
         )]
-        ContactModel contactModel, List<int> categoryList
+        ContactModel contactModel,
+        List<int> categoryList
     )
     {
         ModelState.Remove("AppUserId");
@@ -165,7 +171,9 @@ public class ContactsController : Controller
         // add image
         if (contactModel.ImageFile is not null)
         {
-            contactModel.ImageData = await _imageService.ConvertToByteArrayAsync(contactModel.ImageFile);
+            contactModel.ImageData = await _imageService.ConvertToByteArrayAsync(
+                contactModel.ImageFile
+            );
             contactModel.ImageType = contactModel.ImageFile.ContentType;
         }
 
@@ -185,7 +193,7 @@ public class ContactsController : Controller
     // GET: Contacts/Edit/5
     public async Task<IActionResult> Edit(int? id)
     {
-        if (id == null || _context.Contacts == null)
+        if (id is null)
         {
             return NotFound();
         }
@@ -193,13 +201,19 @@ public class ContactsController : Controller
         var appUserId = _userManager.GetUserId(User);
 
         var contactModel = await _contactService.GetContactForUser(id, appUserId);
-        if (contactModel == null)
+        if (contactModel is null)
         {
             return NotFound();
         }
 
         ViewData["StatesList"] = new SelectList(Enum.GetValues<States>());
-        
+        ViewData["CategoryList"] = new MultiSelectList(
+            await _userService.GetUserCategoriesAsync(appUserId),
+            "Id",
+            "Name",
+            await _contactService.GetContactCategoryIdsAsync(contactModel.Id)
+        );
+
         return View(contactModel);
     }
 
