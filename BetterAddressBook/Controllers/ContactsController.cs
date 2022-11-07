@@ -239,6 +239,13 @@ public class ContactsController : Controller
         {
             try
             {
+                contactModel.Created = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc);
+
+                if (contactModel.BirthDate is not null)
+                {
+                    contactModel.BirthDate = DateTime.SpecifyKind(contactModel.BirthDate.Value, DateTimeKind.Utc);
+                }
+                
                 _context.Update(contactModel);
                 await _context.SaveChangesAsync();
             }
