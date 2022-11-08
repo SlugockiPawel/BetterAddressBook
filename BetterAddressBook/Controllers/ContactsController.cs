@@ -224,6 +224,7 @@ public class ContactsController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Edit(
         int id,
+        List<int> categoryList,
         [Bind(
             "Id,AppUserId,FirstName,LastName,BirthDate,Address1,Address2,City,State,ZipCode,Email,PhoneNumber,Created,ImageData,ImageType, ImageFile"
         )]
@@ -254,6 +255,21 @@ public class ContactsController : Controller
                 
                 _context.Update(contactModel);
                 await _context.SaveChangesAsync();
+                
+                // save categories
+                var oldCategoryIds = await _contactService
+                    .GetContactCategoryIdsAsync(contactModel.Id);
+
+                foreach (var categoryId in oldCategoryIds)
+                {
+                    await _contactService.RemoveContactFromCategoryAsync(categoryId, contactModel.Id);
+                }
+
+                foreach (var selectedCategoryId in categoryList)
+                {
+                    await _contactService.AddContactToCategoryAsync(selectedCategoryId, contactModel.Id);
+                }
+
             }
             catch (DbUpdateConcurrencyException)
             {

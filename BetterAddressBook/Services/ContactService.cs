@@ -110,9 +110,28 @@ public class ContactService : IContactService
         }
     }
 
-    public Task RemoveContactFromCategoryAsync(int categoryId, int contactId)
+    public async Task RemoveContactFromCategoryAsync(int categoryId, int contactId)
     {
-        throw new NotImplementedException();
+        try
+        {
+            if (await IsContactInCategory(categoryId, contactId))
+            {
+                var contact = await _context.Contacts
+                    .FindAsync(contactId);
+                var category = await _context.Categories.FindAsync(categoryId);
+
+                if (contact is not null && category is not null)
+                {
+                    category.Contacts.Remove(contact);
+                    await _context.SaveChangesAsync();
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            throw;
+        }
     }
 
     public async Task<IEnumerable<CategoryModel>> GetUserCategoriesAsync(string userId)
