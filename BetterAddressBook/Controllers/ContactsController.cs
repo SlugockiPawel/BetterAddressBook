@@ -225,7 +225,7 @@ public class ContactsController : Controller
     public async Task<IActionResult> Edit(
         int id,
         [Bind(
-            "Id,AppUserId,FirstName,LastName,BirthDate,Address1,Address2,City,State,ZipCode,Email,PhoneNumber,Created,ImageData,ImageType"
+            "Id,AppUserId,FirstName,LastName,BirthDate,Address1,Address2,City,State,ZipCode,Email,PhoneNumber,Created,ImageData,ImageType, ImageFile"
         )]
         ContactModel contactModel
     )
@@ -244,6 +244,12 @@ public class ContactsController : Controller
                 if (contactModel.BirthDate is not null)
                 {
                     contactModel.BirthDate = DateTime.SpecifyKind(contactModel.BirthDate.Value, DateTimeKind.Utc);
+                }
+
+                if (contactModel.ImageFile is not null)
+                {
+                    contactModel.ImageData = await _imageService.ConvertToByteArrayAsync(contactModel.ImageFile);
+                    contactModel.ImageType = contactModel.ImageFile.ContentType;
                 }
                 
                 _context.Update(contactModel);
