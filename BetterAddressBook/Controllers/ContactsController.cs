@@ -331,4 +331,12 @@ public class ContactsController : Controller
     {
         return (_context.Contacts?.Any(e => e.Id == id)).GetValueOrDefault();
     }
+
+
+    [Authorize]
+    public IActionResult EmailContact(int id)
+    {
+        return View();
+    }
+    
 }
