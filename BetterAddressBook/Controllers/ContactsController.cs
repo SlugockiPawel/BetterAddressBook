@@ -1,6 +1,7 @@
 using BetterAddressBook.Data;
 using BetterAddressBook.Enums;
 using BetterAddressBook.Models;
+using BetterAddressBook.Models.ViewModels;
 using BetterAddressBook.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -334,9 +335,28 @@ public class ContactsController : Controller
 
 
     [Authorize]
-    public IActionResult EmailContact(int id)
+    public async Task<IActionResult> EmailContact(int contactId)
     {
-        return View();
+        var appUserId = _userManager.GetUserId(User);
+        var contact = await _contactService.GetContactForUser(contactId, appUserId);
+
+        if (contact is null)
+        {
+            return NotFound();
+        }
+
+        EmailContactViewModel model = new()
+        {
+            ContactModel = contact,
+            EmailData = new EmailData
+            {
+                EmailAddress = contact.Email,
+                FirstName = contact.FirstName,
+                LastName = contact.LastName
+            }
+        };
+        
+        return View(model);
     }
     
 }
