@@ -1,4 +1,3 @@
-@using BetterAddressBook.Services
 @using BetterAddressBook.Services.Interfaces
 @using Microsoft.AspNetCore.Mvc.TagHelpers
 @model IEnumerable<ContactModel>
@@ -79,3 +78,27 @@
         </div>
     </div>
 </div>
+
+@section Scripts
+{
+    <script>
+    let message = '@(ViewBag.SwalMessage)';
+    
+    if (message.includes("Success") && message !== '' ) 
+    {
+        swal.fire({
+            backdrop: false,
+            icon: 'success',
+            title: message,
+            showConfirmButton: true
+        })
+    } else if (message.includes("Error")) {
+        Swal.fire({
+                    backdrop: false,
+                    icon: 'error',
+                    title: 'Oops...',
+                    text: message
+        })
+        }
+    </script>
+}

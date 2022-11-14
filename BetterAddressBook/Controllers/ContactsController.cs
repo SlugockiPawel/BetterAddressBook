@@ -38,8 +38,9 @@ public class ContactsController : Controller
     }
 
     // GET: Contacts
-    public IActionResult Index(int categoryId)
+    public IActionResult Index(int categoryId, string swalMessage = null)
     {
+        ViewData["SwalMessage"] = swalMessage;
         var userId = _userManager.GetUserId(User);
         var appUser = _userService.GetUserWithContactsAndCategories(userId);
 
@@ -120,12 +121,11 @@ public class ContactsController : Controller
                 await _emailService.SendEmailAsync(model.EmailData.EmailAddress, model.EmailData.Subject,
                     model.EmailData.Body);
 
-                return RedirectToAction("Index", "Contacts");
+                return RedirectToAction("Index", "Contacts", new {swalMessage = "Success: Email Sent!"});
             }
             catch (Exception e)
             {
-                Console.WriteLine(e.Message);
-                throw;
+                return RedirectToAction("Index", "Contacts", new {swalMessage = "Error: Email Send Failed!"});
             }
         }
         return View(model);
