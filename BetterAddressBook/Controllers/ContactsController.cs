@@ -5,6 +5,7 @@ using BetterAddressBook.Models.ViewModels;
 using BetterAddressBook.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -19,20 +20,21 @@ public class ContactsController : Controller
     private readonly IImageService _imageService;
     private readonly UserManager<AppUserModel> _userManager;
     private readonly IUserService _userService;
+    private readonly IEmailSender _emailService;
 
     public ContactsController(
         ApplicationDbContext context,
         UserManager<AppUserModel> userManager,
         IImageService imageService,
         IContactService contactService,
-        IUserService userService
-    )
+        IUserService userService, IEmailSender emailService)
     {
         _context = context;
         _userManager = userManager;
         _imageService = imageService;
         _contactService = contactService;
         _userService = userService;
+        _emailService = emailService;
     }
 
     // GET: Contacts
@@ -104,6 +106,29 @@ public class ContactsController : Controller
         ViewData["CategoryId"] = new SelectList(categories, "Id", "Name");
 
         return View(nameof(Index), orderedContacts);
+    }
+
+
+    [HttpPost]
+    [Authorize]
+    public async Task<IActionResult> EmailContact(EmailContactViewModel model)
+    {
+        if (ModelState.IsValid)
+        {
+            try
+            {
+                await _emailService.SendEmailAsync(model.EmailData.EmailAddress, model.EmailData.Subject,
+                    model.EmailData.Body);
+
+                return RedirectToAction("Index", "Contacts");
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+                throw;
+            }
+        }
+        return View(model);
     }
 
     // GET: Contacts/Details/5
