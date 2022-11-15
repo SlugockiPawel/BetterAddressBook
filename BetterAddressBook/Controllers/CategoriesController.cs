@@ -1,6 +1,8 @@
 using BetterAddressBook.Data;
 using BetterAddressBook.Models;
+using BetterAddressBook.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -11,17 +13,23 @@ namespace BetterAddressBook.Controllers;
 public class CategoriesController : Controller
 {
     private readonly ApplicationDbContext _context;
+    private readonly UserManager<AppUserModel> _userManager;
+    private readonly IUserService _userService;
 
-    public CategoriesController(ApplicationDbContext context)
+    public CategoriesController(ApplicationDbContext context, UserManager<AppUserModel> userManager, IUserService userService)
     {
         _context = context;
+        _userManager = userManager;
+        _userService = userService;
     }
 
     // GET: Categories
     public async Task<IActionResult> Index()
     {
-        var applicationDbContext = _context.Categories.Include(c => c.AppUser);
-        return View(await applicationDbContext.ToListAsync());
+        var appUserId = _userManager.GetUserId(User);
+        var categories = await _userService.GetUserCategoriesAsync(appUserId);
+        
+        return View(categories);
     }
 
     // GET: Categories/Details/5
@@ -164,5 +172,11 @@ public class CategoriesController : Controller
     private bool CategoryModelExists(int id)
     {
         return (_context.Categories?.Any(e => e.Id == id)).GetValueOrDefault();
+    }
+
+    [HttpGet]
+    public IActionResult EmailCategory(int? id)
+    {
+        throw new NotImplementedException();
     }
 }
