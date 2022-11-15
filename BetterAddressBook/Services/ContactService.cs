@@ -134,22 +134,6 @@ public class ContactService : IContactService
         }
     }
 
-    public async Task<IEnumerable<CategoryModel>> GetUserCategoriesAsync(string userId)
-    {
-        try
-        {
-            return await _context.Categories
-                .Where(c => c.AppUserId == userId)
-                .OrderBy(c => c.Name)
-                .ToListAsync();
-        }
-        catch (Exception e)
-        {
-            Console.WriteLine(e);
-            throw;
-        }
-    }
-
     private async Task<ContactModel?> GetContactWithCategories(int contactId)
     {
         try
