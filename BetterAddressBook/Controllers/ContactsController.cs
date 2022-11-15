@@ -317,20 +317,20 @@ public class ContactsController : Controller
     // GET: Contacts/Delete/5
     public async Task<IActionResult> Delete(int? id)
     {
-        if (id == null || _context.Contacts == null)
+        if (id == null)
         {
             return NotFound();
         }
 
-        var contactModel = await _context.Contacts
-            .Include(c => c.AppUser)
-            .FirstOrDefaultAsync(m => m.Id == id);
-        if (contactModel == null)
+        var appUserId = _userManager.GetUserId(User);
+        var contact = await _contactService.GetContactForUser(id, appUserId);
+
+        if (contact == null)
         {
             return NotFound();
         }
 
-        return View(contactModel);
+        return View(contact);
     }
 
     // POST: Contacts/Delete/5
@@ -338,18 +338,15 @@ public class ContactsController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> DeleteConfirmed(int id)
     {
-        if (_context.Contacts == null)
+        var appUserId = _userManager.GetUserId(User);
+        var contact = await _contactService.GetContactForUser(id, appUserId);
+        
+        if (contact != null)
         {
-            return Problem("Entity set 'ApplicationDbContext.Contacts'  is null.");
+            _context.Contacts.Remove(contact);
+            await _context.SaveChangesAsync();
         }
 
-        var contactModel = await _context.Contacts.FindAsync(id);
-        if (contactModel != null)
-        {
-            _context.Contacts.Remove(contactModel);
-        }
-
-        await _context.SaveChangesAsync();
         return RedirectToAction(nameof(Index));
     }
 
