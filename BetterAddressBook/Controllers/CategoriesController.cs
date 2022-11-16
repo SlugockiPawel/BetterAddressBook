@@ -1,10 +1,8 @@
-using BetterAddressBook.Data;
 using BetterAddressBook.Models;
 using BetterAddressBook.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 
 namespace BetterAddressBook.Controllers;
@@ -12,19 +10,19 @@ namespace BetterAddressBook.Controllers;
 [Authorize]
 public class CategoriesController : Controller
 {
-    private readonly ApplicationDbContext _context;
+    private readonly ICategoryService _categoryService;
     private readonly UserManager<AppUserModel> _userManager;
     private readonly IUserService _userService;
 
     public CategoriesController(
-        ApplicationDbContext context,
         UserManager<AppUserModel> userManager,
-        IUserService userService
+        IUserService userService,
+        ICategoryService categoryService
     )
     {
-        _context = context;
         _userManager = userManager;
         _userService = userService;
+        _categoryService = categoryService;
     }
 
     // GET: Categories
@@ -39,20 +37,22 @@ public class CategoriesController : Controller
     // GET: Categories/Details/5
     public async Task<IActionResult> Details(int? id)
     {
-        if (id == null || _context.Categories == null)
+        if (id == null)
         {
             return NotFound();
         }
 
-        var categoryModel = await _context.Categories
-            .Include(c => c.AppUser)
-            .FirstOrDefaultAsync(m => m.Id == id);
-        if (categoryModel == null)
+        var appUserId = _userManager.GetUserId(User);
+        var category = (await _userService.GetUserCategoriesAsync(appUserId)).FirstOrDefault(
+            c => c.AppUserId == appUserId
+        );
+
+        if (category == null)
         {
             return NotFound();
         }
 
-        return View(categoryModel);
+        return View(category);
     }
 
     // GET: Categories/Create
@@ -73,8 +73,7 @@ public class CategoriesController : Controller
         {
             var userId = _userManager.GetUserId(User);
             categoryModel.AppUserId = userId;
-            _context.Add(categoryModel);
-            await _context.SaveChangesAsync();
+            await _categoryService.AddCategory(categoryModel);
 
             return RedirectToAction(nameof(Index));
         }
@@ -100,7 +99,6 @@ public class CategoriesController : Controller
             return NotFound();
         }
 
-        ViewData["AppUserId"] = new SelectList(_context.Users, "Id", "Id", category.AppUserId);
         return View(category);
     }
 
@@ -128,8 +126,7 @@ public class CategoriesController : Controller
 
                 if (categoryModel.AppUserId == userId)
                 {
-                    _context.Update(categoryModel);
-                    await _context.SaveChangesAsync();
+                    await _categoryService.UpdateCategory(categoryModel);
                 }
             }
             catch (DbUpdateConcurrencyException)
@@ -151,20 +148,22 @@ public class CategoriesController : Controller
     // GET: Categories/Delete/5
     public async Task<IActionResult> Delete(int? id)
     {
-        if (id == null || _context.Categories == null)
+        if (id == null)
         {
             return NotFound();
         }
 
-        var categoryModel = await _context.Categories
-            .Include(c => c.AppUser)
-            .FirstOrDefaultAsync(m => m.Id == id);
-        if (categoryModel == null)
+        var appUserId = _userManager.GetUserId(User);
+        var category = (await _userService.GetUserCategoriesAsync(appUserId)).FirstOrDefault(
+            c => c.Id == id
+        );
+
+        if (category == null)
         {
             return NotFound();
         }
 
-        return View(categoryModel);
+        return View(category);
     }
 
     // POST: Categories/Delete/5
@@ -172,24 +171,22 @@ public class CategoriesController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> DeleteConfirmed(int id)
     {
-        if (_context.Categories == null)
+        var appUserId = _userManager.GetUserId(User);
+        var category = (await _userService.GetUserCategoriesAsync(appUserId)).FirstOrDefault(
+            c => c.Id == id
+        );
+
+        if (category != null)
         {
-            return Problem("Entity set 'ApplicationDbContext.Categories'  is null.");
+            await _categoryService.RemoveCategory(category);
         }
 
-        var categoryModel = await _context.Categories.FindAsync(id);
-        if (categoryModel != null)
-        {
-            _context.Categories.Remove(categoryModel);
-        }
-
-        await _context.SaveChangesAsync();
         return RedirectToAction(nameof(Index));
     }
 
     private bool CategoryModelExists(int id)
     {
-        return (_context.Categories?.Any(e => e.Id == id)).GetValueOrDefault();
+        return _categoryService.CategoryExists(id);
     }
 
     [HttpGet]
@@ -198,5 +195,3 @@ public class CategoriesController : Controller
         throw new NotImplementedException();
     }
 }
-
-//TODO add CategoryService and use it instead of _context
