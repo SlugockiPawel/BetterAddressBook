@@ -54,7 +54,6 @@ public class CategoriesController : Controller
     // GET: Categories/Create
     public IActionResult Create()
     {
-        ViewData["AppUserId"] = new SelectList(_context.Users, "Id", "Id");
         return View();
     }
 
@@ -63,16 +62,19 @@ public class CategoriesController : Controller
     // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Create([Bind("Id,AppUserId,Name")] CategoryModel categoryModel)
+    public async Task<IActionResult> Create([Bind("Name")] CategoryModel categoryModel)
     {
+        ModelState.Remove("AppUserId");
         if (ModelState.IsValid)
         {
+            var userId = _userManager.GetUserId(User);
+            categoryModel.AppUserId = userId;
             _context.Add(categoryModel);
             await _context.SaveChangesAsync();
+
             return RedirectToAction(nameof(Index));
         }
 
-        ViewData["AppUserId"] = new SelectList(_context.Users, "Id", "Id", categoryModel.AppUserId);
         return View(categoryModel);
     }
 
