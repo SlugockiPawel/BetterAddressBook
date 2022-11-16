@@ -16,7 +16,11 @@ public class CategoriesController : Controller
     private readonly UserManager<AppUserModel> _userManager;
     private readonly IUserService _userService;
 
-    public CategoriesController(ApplicationDbContext context, UserManager<AppUserModel> userManager, IUserService userService)
+    public CategoriesController(
+        ApplicationDbContext context,
+        UserManager<AppUserModel> userManager,
+        IUserService userService
+    )
     {
         _context = context;
         _userManager = userManager;
@@ -28,7 +32,7 @@ public class CategoriesController : Controller
     {
         var appUserId = _userManager.GetUserId(User);
         var categories = await _userService.GetUserCategoriesAsync(appUserId);
-        
+
         return View(categories);
     }
 
@@ -87,10 +91,10 @@ public class CategoriesController : Controller
         }
 
         var appUserId = _userManager.GetUserId(User);
-        var category = (await _userService
-            .GetUserCategoriesAsync(appUserId))
-            .FirstOrDefault(c => c.Id == id);
-        
+        var category = (await _userService.GetUserCategoriesAsync(appUserId)).FirstOrDefault(
+            c => c.Id == id
+        );
+
         if (category == null)
         {
             return NotFound();
@@ -106,7 +110,10 @@ public class CategoriesController : Controller
     [Authorize]
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Edit(int id, [Bind("Id,AppUserId,Name")] CategoryModel categoryModel)
+    public async Task<IActionResult> Edit(
+        int id,
+        [Bind("Id,AppUserId,Name")] CategoryModel categoryModel
+    )
     {
         if (id != categoryModel.Id)
         {
@@ -117,11 +124,10 @@ public class CategoriesController : Controller
         {
             try
             {
-                var appUserId = _userManager.GetUserId(User);
+                var userId = _userManager.GetUserId(User);
 
-                if (categoryModel.AppUserId == appUserId)
+                if (categoryModel.AppUserId == userId)
                 {
-                    categoryModel.AppUserId = appUserId;
                     _context.Update(categoryModel);
                     await _context.SaveChangesAsync();
                 }
@@ -192,3 +198,5 @@ public class CategoriesController : Controller
         throw new NotImplementedException();
     }
 }
+
+//TODO add CategoryService and use it instead of _context
