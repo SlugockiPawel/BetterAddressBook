@@ -79,24 +79,29 @@ public class CategoriesController : Controller
     // GET: Categories/Edit/5
     public async Task<IActionResult> Edit(int? id)
     {
-        if (id == null || _context.Categories == null)
+        if (id == null)
         {
             return NotFound();
         }
 
-        var categoryModel = await _context.Categories.FindAsync(id);
-        if (categoryModel == null)
+        var appUserId = _userManager.GetUserId(User);
+        var category = (await _userService
+            .GetUserCategoriesAsync(appUserId))
+            .FirstOrDefault(c => c.Id == id);
+        
+        if (category == null)
         {
             return NotFound();
         }
 
-        ViewData["AppUserId"] = new SelectList(_context.Users, "Id", "Id", categoryModel.AppUserId);
-        return View(categoryModel);
+        ViewData["AppUserId"] = new SelectList(_context.Users, "Id", "Id", category.AppUserId);
+        return View(category);
     }
 
     // POST: Categories/Edit/5
     // To protect from overposting attacks, enable the specific properties you want to bind to.
     // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+    [Authorize]
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Edit(int id, [Bind("Id,AppUserId,Name")] CategoryModel categoryModel)
@@ -110,8 +115,14 @@ public class CategoriesController : Controller
         {
             try
             {
-                _context.Update(categoryModel);
-                await _context.SaveChangesAsync();
+                var appUserId = _userManager.GetUserId(User);
+
+                if (categoryModel.AppUserId == appUserId)
+                {
+                    categoryModel.AppUserId = appUserId;
+                    _context.Update(categoryModel);
+                    await _context.SaveChangesAsync();
+                }
             }
             catch (DbUpdateConcurrencyException)
             {
@@ -126,7 +137,6 @@ public class CategoriesController : Controller
             return RedirectToAction(nameof(Index));
         }
 
-        ViewData["AppUserId"] = new SelectList(_context.Users, "Id", "Id", categoryModel.AppUserId);
         return View(categoryModel);
     }
 
