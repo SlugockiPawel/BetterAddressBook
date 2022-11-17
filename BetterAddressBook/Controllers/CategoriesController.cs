@@ -1,9 +1,9 @@
-using System.Text.RegularExpressions;
 using BetterAddressBook.Models;
 using BetterAddressBook.Models.ViewModels;
 using BetterAddressBook.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -13,23 +13,25 @@ namespace BetterAddressBook.Controllers;
 public class CategoriesController : Controller
 {
     private readonly ICategoryService _categoryService;
+    private readonly IEmailSender _emailService;
     private readonly UserManager<AppUserModel> _userManager;
     private readonly IUserService _userService;
 
     public CategoriesController(
         UserManager<AppUserModel> userManager,
         IUserService userService,
-        ICategoryService categoryService
-    )
+        ICategoryService categoryService, IEmailSender emailService)
     {
         _userManager = userManager;
         _userService = userService;
         _categoryService = categoryService;
+        _emailService = emailService;
     }
 
     // GET: Categories
-    public async Task<IActionResult> Index()
+    public async Task<IActionResult> Index(string? swalMessage = null)
     {
+        ViewData["SwalMessage"] = swalMessage;
         var appUserId = _userManager.GetUserId(User);
         var categories = await _userService.GetUserCategoriesAsync(appUserId);
 
@@ -215,7 +217,30 @@ public class CategoriesController : Controller
                 Subject = $"Group Name: {category.Name}"
             }
         };
-        
+
+        return View(model);
+    }
+
+    [Authorize]
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> EmailCategory(EmailCategoryViewModel model)
+    {
+        if (ModelState.IsValid)
+        {
+            try
+            {
+                await _emailService.SendEmailAsync(model.EmailData.EmailAddress, model.EmailData.Subject,
+                    model.EmailData.Body);
+
+                return RedirectToAction("Index", "Categories", new { swalMessage = "Success: Email Sent!" });
+            }
+            catch (Exception)
+            {
+                return RedirectToAction("Index", "Categories", new { swalMessage = "Error: Email Send Failed!" });
+            }
+        }
+
         return View(model);
     }
 }

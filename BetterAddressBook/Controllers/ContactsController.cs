@@ -17,10 +17,10 @@ public class ContactsController : Controller
 {
     private readonly IContactService _contactService;
     private readonly ApplicationDbContext _context;
+    private readonly IEmailSender _emailService;
     private readonly IImageService _imageService;
     private readonly UserManager<AppUserModel> _userManager;
     private readonly IUserService _userService;
-    private readonly IEmailSender _emailService;
 
     public ContactsController(
         ApplicationDbContext context,
@@ -38,7 +38,7 @@ public class ContactsController : Controller
     }
 
     // GET: Contacts
-    public IActionResult Index(int categoryId, string swalMessage = null)
+    public IActionResult Index(int categoryId, string? swalMessage = null)
     {
         ViewData["SwalMessage"] = swalMessage;
         var userId = _userManager.GetUserId(User);
@@ -121,13 +121,14 @@ public class ContactsController : Controller
                 await _emailService.SendEmailAsync(model.EmailData.EmailAddress, model.EmailData.Subject,
                     model.EmailData.Body);
 
-                return RedirectToAction("Index", "Contacts", new {swalMessage = "Success: Email Sent!"});
+                return RedirectToAction("Index", "Contacts", new { swalMessage = "Success: Email Sent!" });
             }
             catch (Exception e)
             {
-                return RedirectToAction("Index", "Contacts", new {swalMessage = "Error: Email Send Failed!"});
+                return RedirectToAction("Index", "Contacts", new { swalMessage = "Error: Email Send Failed!" });
             }
         }
+
         return View(model);
     }
 
@@ -278,10 +279,10 @@ public class ContactsController : Controller
                     contactModel.ImageData = await _imageService.ConvertToByteArrayAsync(contactModel.ImageFile);
                     contactModel.ImageType = contactModel.ImageFile.ContentType;
                 }
-                
+
                 _context.Update(contactModel);
                 await _context.SaveChangesAsync();
-                
+
                 // save categories
                 var oldCategoryIds = await _contactService
                     .GetContactCategoryIdsAsync(contactModel.Id);
@@ -295,7 +296,6 @@ public class ContactsController : Controller
                 {
                     await _contactService.AddContactToCategoryAsync(selectedCategoryId, contactModel.Id);
                 }
-
             }
             catch (DbUpdateConcurrencyException)
             {
@@ -340,7 +340,7 @@ public class ContactsController : Controller
     {
         var appUserId = _userManager.GetUserId(User);
         var contact = await _contactService.GetContactForUser(id, appUserId);
-        
+
         if (contact != null)
         {
             _context.Contacts.Remove(contact);
@@ -377,8 +377,7 @@ public class ContactsController : Controller
                 LastName = contact.LastName
             }
         };
-        
+
         return View(model);
     }
-    
 }
