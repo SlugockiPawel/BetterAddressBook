@@ -2,7 +2,7 @@
 
 public class EmailCategoryViewModel
 {
-    public HashSet<ContactModel> Contacts { get; set; } = new();
+    public List<ContactModel> Contacts { get; set; } = new();
     public EmailData? EmailData { get; set; }
     
 }

@@ -203,11 +203,11 @@ public class CategoriesController : Controller
             return NotFound();
         }
 
-        var emails = category.Contacts.Select(c => c.Email).ToHashSet();
+        var emails = category.Contacts.Select(c => c.Email).ToList();
 
         EmailCategoryViewModel model = new()
         {
-            Contacts = category.Contacts.ToHashSet(),
+            Contacts = category.Contacts.ToList(),
             EmailData = new EmailData
             {
                 GroupName = category.Name,
