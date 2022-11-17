@@ -8,4 +8,5 @@ public interface ICategoryService
     Task UpdateCategory(CategoryModel category);
     Task RemoveCategory(CategoryModel category);
     bool CategoryExists(int id);
+    Task<CategoryModel?> GetCategoryWithContactsForUser(int categoryId, string userId);
 }

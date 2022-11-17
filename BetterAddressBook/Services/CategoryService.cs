@@ -1,6 +1,7 @@
 ﻿using BetterAddressBook.Data;
 using BetterAddressBook.Models;
 using BetterAddressBook.Services.Interfaces;
+using Microsoft.EntityFrameworkCore;
 
 namespace BetterAddressBook.Services;
 
@@ -60,6 +61,21 @@ public class CategoryService : ICategoryService
         try
         {
             return _context.Categories.Any(c => c.Id == id);
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            throw;
+        }
+    }
+
+    public async Task<CategoryModel?> GetCategoryWithContactsForUser(int categoryId, string userId)
+    {
+        try
+        {
+            return await _context.Categories
+                .Include(c => c.Contacts)
+                .FirstOrDefaultAsync(c => c.Id == categoryId && c.AppUserId == userId);
         }
         catch (Exception e)
         {
