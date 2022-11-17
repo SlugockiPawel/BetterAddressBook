@@ -1,4 +1,6 @@
+using System.Text.RegularExpressions;
 using BetterAddressBook.Models;
+using BetterAddressBook.Models.ViewModels;
 using BetterAddressBook.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -189,9 +191,31 @@ public class CategoriesController : Controller
         return _categoryService.CategoryExists(id);
     }
 
+    [Authorize]
     [HttpGet]
-    public IActionResult EmailCategory(int? id)
+    public async Task<IActionResult> EmailCategory(int id)
     {
-        throw new NotImplementedException();
+        var appUserId = _userManager.GetUserId(User);
+        var category = await _categoryService.GetCategoryWithContactsForUser(id, appUserId);
+
+        if (category is null)
+        {
+            return NotFound();
+        }
+
+        var emails = category.Contacts.Select(c => c.Email).ToHashSet();
+
+        EmailCategoryViewModel model = new()
+        {
+            Contacts = category.Contacts.ToHashSet(),
+            EmailData = new EmailData
+            {
+                GroupName = category.Name,
+                EmailAddress = string.Join(";", emails),
+                Subject = $"Group Name: {category.Name}"
+            }
+        };
+        
+        return View(model);
     }
 }
