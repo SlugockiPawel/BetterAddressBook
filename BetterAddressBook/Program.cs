@@ -43,6 +43,9 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
+// app.UseExceptionHandler("/Home/Error");
+app.UseStatusCodePagesWithReExecute("/Home/HandleError/{0}");
+
 app.UseAuthentication();
 app.UseAuthorization();
 
