@@ -38,26 +38,7 @@ public class CategoriesController : Controller
         return View(categories);
     }
 
-    // GET: Categories/Details/5
-    public async Task<IActionResult> Details(int? id)
-    {
-        if (id == null)
-        {
-            return NotFound();
-        }
 
-        var appUserId = _userManager.GetUserId(User);
-        var category = (await _userService.GetUserCategoriesAsync(appUserId)).FirstOrDefault(
-            c => c.AppUserId == appUserId
-        );
-
-        if (category == null)
-        {
-            return NotFound();
-        }
-
-        return View(category);
-    }
 
     // GET: Categories/Create
     public IActionResult Create()
@@ -230,8 +211,8 @@ public class CategoriesController : Controller
         {
             try
             {
-                await _emailService.SendEmailAsync(model.EmailData.EmailAddress, model.EmailData.Subject,
-                    model.EmailData.Body);
+                await _emailService.SendEmailAsync(model.EmailData?.EmailAddress, model.EmailData?.Subject,
+                    model.EmailData?.Body);
 
                 return RedirectToAction("Index", "Categories", new { swalMessage = "Success: Email Sent!" });
             }
