@@ -1,4 +1,5 @@
 using BetterAddressBook.Data;
+using BetterAddressBook.Helpers;
 using BetterAddressBook.Models;
 using BetterAddressBook.Services;
 using BetterAddressBook.Services.Interfaces;
@@ -8,7 +9,7 @@ using Microsoft.EntityFrameworkCore;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-var connectionString = builder.Configuration.GetSection("pgSettings")["pgConnection"];
+var connectionString = ConnectionStringHelper.GetConnectionString(builder);
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseNpgsql(connectionString));
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
